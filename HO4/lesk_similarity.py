@@ -1,13 +1,21 @@
-from nltk.corpus import wordnet
-from nltk.corpus import stopwords
-from operator import itemgetter
+from itertools import product
 
-def lesk_similarity(syn1,syn2):
-    def1words=set(x for x in syn1.definition() if x not in stopwords.words('english'))
-    def2words=set(x for x in syn2.definition() if x not in stopwords.words('english'))
-    return len(def1words.intersection(def2words))/min(len(def1words),len(def2words))
+from nltk.corpus import stopwords, wordnet as wn
 
-def word_similarity(word1,word2):
-    return max((lesk_similarity(i, j), i, j) for i in wordnet.synsets(word1) for j in wordnet.synsets(word2))
+sw = stopwords.words('english')
+
+
+def defwords(syn):
+	return set(filter(lambda x: x not in sw, syn.definition()))
+
+
+def lesk_similarity(syn1, syn2):
+	d1, d2 = defwords(syn1), defwords(syn2)
+	return len(d1.intersection(d2)) / min(len(d1), len(d2))
+
+
+def word_similarity(w1, w2):
+	return max((lesk_similarity(i, j), i, j) for i, j in product(wn.synsets(w1), wn.synsets(w2)))
+
 
 print(word_similarity('automobile', 'car'))
